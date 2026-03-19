@@ -4,7 +4,7 @@ import { TOOL_SCHEMAS } from "../../schema/toolSchemas.js";
 describe("Tool Schemas", () => {
   describe("Schema Structure Validation", () => {
     it("should have all required tools", () => {
-      expect(TOOL_SCHEMAS).toHaveLength(6);
+      expect(TOOL_SCHEMAS).toHaveLength(7);
 
       const toolNames = TOOL_SCHEMAS.map((schema) => schema.name);
       expect(toolNames).toContain("chat_perplexity");
@@ -13,6 +13,7 @@ describe("Tool Schemas", () => {
       expect(toolNames).toContain("get_documentation");
       expect(toolNames).toContain("find_apis");
       expect(toolNames).toContain("check_deprecated_code");
+      expect(toolNames).toContain("list_available_models");
     });
 
     it("should have valid schema structure for each tool", () => {
@@ -42,12 +43,13 @@ describe("Tool Schemas", () => {
   describe("Required Field Definitions", () => {
     it("should have proper required field definitions in input schemas", () => {
       TOOL_SCHEMAS.forEach((schema) => {
-        if (schema.inputSchema.required) {
-          expect(Array.isArray(schema.inputSchema.required)).toBe(true);
+        const inputSchema = schema.inputSchema as any;
+        if (inputSchema.required) {
+          expect(Array.isArray(inputSchema.required)).toBe(true);
 
           // Check that required fields are defined in properties
-          schema.inputSchema.required.forEach((field: any) => {
-            expect((schema.inputSchema.properties as any)[field]).toBeDefined();
+          inputSchema.required.forEach((field: any) => {
+            expect((inputSchema.properties as any)[field]).toBeDefined();
           });
         }
       });
@@ -55,8 +57,9 @@ describe("Tool Schemas", () => {
 
     it("should have descriptive field definitions", () => {
       TOOL_SCHEMAS.forEach((schema) => {
-        Object.keys(schema.inputSchema.properties).forEach((fieldName) => {
-          const field: any = (schema.inputSchema.properties as any)[fieldName];
+        const inputSchema = schema.inputSchema as any;
+        Object.keys(inputSchema.properties).forEach((fieldName) => {
+          const field: any = (inputSchema.properties as any)[fieldName];
           expect(field.description).toBeDefined();
           expect(typeof field.description).toBe("string");
           expect(field.description.length).toBeGreaterThan(0);
@@ -68,6 +71,7 @@ describe("Tool Schemas", () => {
   describe("Example Data Validity", () => {
     it("should have valid example data for all tools", () => {
       TOOL_SCHEMAS.forEach((schema) => {
+        const inputSchema = schema.inputSchema as any;
         expect(schema.examples.length).toBeGreaterThan(0);
 
         schema.examples.forEach((example) => {
@@ -77,8 +81,8 @@ describe("Tool Schemas", () => {
           expect(example.output).toBeDefined();
 
           // Check that required input fields are present in examples
-          if (schema.inputSchema.required) {
-            schema.inputSchema.required.forEach((requiredField: any) => {
+          if (inputSchema.required) {
+            inputSchema.required.forEach((requiredField: any) => {
               expect((example.input as any)[requiredField]).toBeDefined();
             });
           }
@@ -107,8 +111,9 @@ describe("Tool Schemas", () => {
     it("should have proper schema structure", () => {
       TOOL_SCHEMAS.forEach((schema) => {
         // Check input schema only
-        expect(schema.inputSchema.type).toBe("object");
-        expect(schema.inputSchema.properties).toBeDefined();
+        const inputSchema = schema.inputSchema as any;
+        expect(inputSchema.type).toBe("object");
+        expect(inputSchema.properties).toBeDefined();
       });
     });
   });

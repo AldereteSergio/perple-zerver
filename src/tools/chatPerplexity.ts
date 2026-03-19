@@ -9,13 +9,13 @@ import type { ChatMessage, PuppeteerContext } from "../types/index.js";
  * Handles chat interactions with conversation history
  */
 export default async function chatPerplexity(
-  args: { message: string; chat_id?: string },
+  args: { message: string; chat_id?: string; model?: string },
   ctx: PuppeteerContext,
-  performSearch: (prompt: string, ctx: PuppeteerContext) => Promise<string>,
+  performSearch: (prompt: string, ctx: PuppeteerContext, model?: string) => Promise<string>,
   getChatHistory: (chat_id: string) => ChatMessage[],
   saveChatMessage: (chat_id: string, message: ChatMessage) => void,
 ): Promise<string> {
-  const { message, chat_id = crypto.randomUUID() } = args;
+  const { message, chat_id = crypto.randomUUID(), model } = args;
   const history = getChatHistory(chat_id);
   const userMessage: ChatMessage = { role: "user", content: message };
   saveChatMessage(chat_id, userMessage);
@@ -27,5 +27,5 @@ export default async function chatPerplexity(
   }
   conversationPrompt += `User: ${message}\n`;
 
-  return await performSearch(conversationPrompt, ctx);
+  return await performSearch(conversationPrompt, ctx, model);
 }

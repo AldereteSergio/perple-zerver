@@ -97,10 +97,10 @@ export class PerplexityServer {
 
   // Tool handler implementations
   private async handleChatPerplexity(args: Record<string, unknown>): Promise<string> {
-    const typedArgs = args as { message: string; chat_id?: string };
+    const typedArgs = args as { message: string; chat_id?: string; model?: string };
 
     // Use modular search engine
-    const searchResult = await this.searchEngine.performSearch(typedArgs.message);
+    const searchResult = await this.searchEngine.performSearch(typedArgs.message, typedArgs.model);
 
     // Use modular database manager
     const getChatHistoryFn = (chatId: string) => this.databaseManager.getChatHistory(chatId);
@@ -113,7 +113,7 @@ export class PerplexityServer {
     return await chatPerplexity(
       typedArgs,
       {} as never, // Context not needed with modular approach
-      () => Promise.resolve(searchResult),
+      (prompt, _ctx, model) => this.searchEngine.performSearch(prompt, model),
       getChatHistoryFn,
       saveChatMessageFn,
     );
@@ -147,10 +147,16 @@ export class PerplexityServer {
     const typedArgs = args as {
       query: string;
       detail_level?: "brief" | "normal" | "detailed";
+      model?: string;
       stream?: boolean;
     };
 
-    return await this.searchEngine.performSearch(typedArgs.query);
+    return await this.searchEngine.performSearch(typedArgs.query, typedArgs.model);
+  }
+
+  private async handleListAvailableModels(_args: Record<string, unknown>): Promise<string> {
+    const models = await this.searchEngine.listAvailableModels();
+    return JSON.stringify({ models }, null, 2);
   }
 
   private async handleExtractUrlContent(args: Record<string, unknown>): Promise<string> {
@@ -180,6 +186,7 @@ export class PerplexityServer {
       check_deprecated_code: this.handleCheckDeprecatedCode.bind(this),
       search: this.handleSearch.bind(this),
       extract_url_content: this.handleExtractUrlContent.bind(this),
+      list_available_models: this.handleListAvailableModels.bind(this),
     });
 
     setupToolHandlers(this.server, toolHandlers);

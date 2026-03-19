@@ -32,6 +32,12 @@ export const TOOL_SCHEMAS = [
             "Optional: ID of an existing chat to continue. If not provided, a new chat will be created.",
           examples: ["123e4567-e89b-12d3-a456-426614174000"],
         },
+        model: {
+          type: "string",
+          description:
+            "Optional: The specific AI model to use (e.g., 'Claude Sonnet 4.6', 'GPT-5.4'). Use list_available_models to see current options.",
+          examples: ["Claude Sonnet 4.6", "GPT-5.4"],
+        },
       },
       required: ["message"],
     },
@@ -270,6 +276,12 @@ export const TOOL_SCHEMAS = [
           description: "Optional: Controls the level of detail in the response (default: normal).",
           examples: ["brief", "detailed"],
         },
+        model: {
+          type: "string",
+          description:
+            "Optional: The specific AI model to use (e.g., 'Claude Sonnet 4.6', 'GPT-5.4'). Use list_available_models to see current options.",
+          examples: ["Claude Sonnet 4.6", "GPT-5.4"],
+        },
         stream: {
           type: "boolean",
           description:
@@ -295,5 +307,27 @@ export const TOOL_SCHEMAS = [
       },
     ],
     related_tools: ["chat_perplexity", "get_documentation", "find_apis"],
+  },
+  {
+    name: "list_available_models",
+    description:
+      "Lists the AI models currently available in your Perplexity account (e.g., Claude, GPT-4, etc.). Useful to see which models you can pass to the 'model' parameter in search or chat tools.",
+    category: "Configuration",
+    keywords: ["models", "list", "available", "config", "options", "perplexity"],
+    use_cases: ["Checking available models", "Verifying Pro account features"],
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+    examples: [
+      {
+        description: "List all models",
+        input: {},
+        output: {
+          models: ["Sonar", "GPT-5.4", "Claude Sonnet 4.6", "Gemini 3.1 Pro"],
+        },
+      },
+    ],
+    related_tools: ["search", "chat_perplexity"],
   },
 ] as const;

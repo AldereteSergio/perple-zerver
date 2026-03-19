@@ -47,6 +47,7 @@ vi.mock("../../server/modules/SearchEngine.js", () => {
   return {
     SearchEngine: vi.fn().mockImplementation(() => ({
       performSearch: vi.fn().mockResolvedValue("Mock search result"),
+      listAvailableModels: vi.fn().mockResolvedValue(["Model 1", "Model 2"]),
     })),
   };
 });
@@ -87,6 +88,7 @@ describe("MCP Server Integration", () => {
 
       const mockSearchEngine: ISearchEngine = {
         performSearch: vi.fn().mockResolvedValue("Custom search result"),
+        listAvailableModels: vi.fn().mockResolvedValue(["Model 1", "Model 2"]),
       };
 
       const mockDatabaseManager: IDatabaseManager = {

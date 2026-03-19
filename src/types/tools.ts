@@ -4,7 +4,8 @@
 
 // ─── SEARCH ENGINE INTERFACE ──────────────────────────────────────────
 export interface ISearchEngine {
-  performSearch(query: string): Promise<string>;
+  performSearch(query: string, model?: string): Promise<string>;
+  listAvailableModels(): Promise<string[]>;
 }
 
 // ─── TOOL HANDLER TYPES ───────────────────────────────────────────────
@@ -26,9 +27,12 @@ export interface ToolHandlersRegistry {
 }
 
 // ─── TOOL ARGUMENT TYPES ──────────────────────────────────────────────
+export interface ListAvailableModelsArgs {}
+
 export interface ChatPerplexityArgs {
   message: string;
   chat_id?: string;
+  model?: string;
 }
 
 export interface ExtractUrlContentArgs {
@@ -54,10 +58,12 @@ export interface CheckDeprecatedCodeArgs {
 export interface SearchArgs {
   query: string;
   detail_level?: "brief" | "normal" | "detailed";
+  model?: string;
 }
 
 // ─── UNION TYPES ──────────────────────────────────────────────────────
 export type ToolArgs =
+  | ListAvailableModelsArgs
   | ChatPerplexityArgs
   | ExtractUrlContentArgs
   | GetDocumentationArgs

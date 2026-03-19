@@ -120,6 +120,7 @@ describe("Type Definitions", () => {
     it("should define ISearchEngine interface", () => {
       const searchEngine: ISearchEngine = {
         performSearch: async () => "result",
+        listAvailableModels: async () => ["model1"],
       };
 
       expect(searchEngine.performSearch).toBeTypeOf("function");

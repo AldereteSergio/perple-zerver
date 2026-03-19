@@ -11,7 +11,7 @@ import { CONFIG } from "../config.js";
 export class SearchEngine implements ISearchEngine {
   constructor(private readonly browserManager: IBrowserManager) {}
 
-  async performSearch(query: string): Promise<string> {
+  async performSearch(query: string, model?: string): Promise<string> {
     // Set a global timeout for the entire operation with buffer for MCP
     const operationTimeout = setTimeout(() => {
       logError("Global operation timeout reached, initiating recovery...");
@@ -57,6 +57,11 @@ export class SearchEngine implements ISearchEngine {
         }
 
         logInfo(`Found search input with selector: ${selector}`);
+
+        // Select model if specified
+        if (model) {
+          await this.selectModel(page, model);
+        }
 
         // Perform the search
         await this.executeSearch(page, selector, query);
@@ -376,5 +381,99 @@ export class SearchEngine implements ISearchEngine {
     }
 
     return `The search operation could not be completed. Error: ${errorMessage}. Please try again later with a more specific query.`;
+  }
+
+  async listAvailableModels(): Promise<string[]> {
+    try {
+      if (!this.browserManager.isReady()) {
+        await this.browserManager.initialize();
+      }
+      this.browserManager.resetIdleTimeout();
+      await this.browserManager.navigateToPerplexity();
+
+      const page = this.browserManager.getPage();
+      if (!page) throw new Error("Page not initialized");
+
+      // Focus input to show model button
+      const inputSelector = '[role="textbox"]';
+      await page.waitForSelector(inputSelector);
+      await page.click(inputSelector);
+      await page.keyboard.type(" ");
+
+      const modelButtonSelector = 'button[aria-label="Model"]';
+      await page.waitForSelector(modelButtonSelector);
+      await page.click(modelButtonSelector);
+
+      // Wait for menu and extract options
+      await new Promise((r) => setTimeout(r, 1000));
+      const models = await page.evaluate(() => {
+        const items = Array.from(
+          document.querySelectorAll('[role="menuitem"], [role="option"], button, span'),
+        );
+        const modelNames = items
+          .map((el) => (el as HTMLElement).innerText?.trim() || "")
+          .filter(
+            (text) =>
+              text.length > 0 &&
+              (text.includes("Claude") ||
+                text.includes("GPT") ||
+                text.includes("Sonar") ||
+                text.includes("DeepSeek") ||
+                text.includes("o1") ||
+                text.includes("Pro")),
+          );
+        return [...new Set(modelNames)];
+      });
+
+      // Close menu by clicking elsewhere
+      await page.click("body");
+
+      return models;
+    } catch (error) {
+      logError("Failed to list models:", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return [];
+    }
+  }
+
+  private async selectModel(page: Page, modelName: string): Promise<void> {
+    try {
+      logInfo(`Attempting to select model: ${modelName}`);
+      const modelButtonSelector = 'button[aria-label="Model"]';
+      await page.waitForSelector(modelButtonSelector);
+      await page.click(modelButtonSelector);
+
+      await new Promise((r) => setTimeout(r, 1000));
+
+      const selected = await page.evaluate((targetModel) => {
+        const items = Array.from(
+          document.querySelectorAll('[role="menuitem"], [role="option"], button, span'),
+        );
+        const target = items.find((el) =>
+          (el as HTMLElement).innerText.toLowerCase().includes(targetModel.toLowerCase()),
+        );
+        if (target) {
+          (target as HTMLElement).click();
+          return true;
+        }
+        return false;
+      }, modelName);
+
+      if (selected) {
+        logInfo(`Successfully selected model: ${modelName}`);
+        await new Promise((r) => setTimeout(r, 1000)); // Wait for change to apply
+      } else {
+        logWarn(`Model ${modelName} not found in menu, continuing with default`);
+        await page.click("body"); // Close menu
+      }
+    } catch (error) {
+      logWarn(`Error selecting model: ${error instanceof Error ? error.message : String(error)}`);
+      try {
+        await page.click("body");
+      } catch {
+        /* ignore */
+      }
+    }
   }
 }
