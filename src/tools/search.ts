@@ -18,19 +18,10 @@ export default async function search(
   ctx: PuppeteerContext,
   performSearch: (prompt: string, ctx: PuppeteerContext, model?: string, attachments?: string[]) => Promise<string>,
 ): Promise<string | AsyncGenerator<string, void, unknown>> {
-  const { query, detail_level = "normal", model, attachments, stream = false } = args;
+  const { query, model, attachments, stream = false } = args;
 
-  let prompt = query;
-  switch (detail_level) {
-    case "brief":
-      prompt = `Provide a brief, concise answer to: ${query}`;
-      break;
-    case "detailed":
-      prompt = `Provide a comprehensive, detailed analysis of: ${query}. Include relevant examples, context, and supporting information where applicable.`;
-      break;
-    default:
-      prompt = `Provide a clear, balanced answer to: ${query}. Include key points and relevant context.`;
-  }
+  // Pepe is now a raw executioner. The agent is responsible for high-quality prompting.
+  const prompt = query;
 
   // If streaming is not requested, return traditional response
   if (!stream) {

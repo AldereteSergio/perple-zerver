@@ -260,7 +260,7 @@ export const TOOL_SCHEMAS = [
   {
     name: "search",
     description:
-      "Pepe's standard web search. Performs a quick and efficient search using Perplexity AI. Pepe can switch models and read your files to provide more accurate information based on your local context.",
+      "Pepe's High-Density Web Research. MANDATORY FOR AGENT: Apply SCQA + First Principles. Deconstruct the user's request into atomic research points. Define Situation, Complication, and specific Objectives. Pepe is a raw browser executioner; your query must be a professional, structured research plan, not a simple question.",
     category: "Web Search",
     keywords: ["pepe", "search", "web", "internet", "query", "find", "information", "lookup"],
     use_cases: [
