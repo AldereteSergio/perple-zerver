@@ -235,7 +235,10 @@ export class SearchEngine implements ISearchEngine {
 
         await page.evaluate(() => {
           const items = Array.from(document.querySelectorAll('[role="menuitem"], button'));
-          const target = items.find((el) => (el as HTMLElement).innerText.includes("Deep research"));
+          const target = items.find((el) => {
+            const text = (el as HTMLElement).innerText.toLowerCase();
+            return text.includes("deep research") || text.includes("investigación profunda");
+          });
           if (target) (target as HTMLElement).click();
         });
 
