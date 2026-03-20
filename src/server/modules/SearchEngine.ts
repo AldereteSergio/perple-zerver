@@ -143,22 +143,81 @@ export class SearchEngine implements ISearchEngine {
       const page = this.browserManager.getPage();
       if (!page) throw new Error("Page not initialized");
 
-      await page.waitForSelector('[role="textbox"]');
-      await page.click('[role="textbox"]');
+      const inputSelector = '[role="textbox"]';
+      await page.waitForSelector(inputSelector);
+      
+      // Clear and type a space to trigger the model button if hidden
+      await page.click(inputSelector);
+      await page.evaluate((sel) => {
+        const el = document.querySelector(sel) as HTMLTextAreaElement;
+        if (el) el.value = '';
+      }, inputSelector);
       await page.keyboard.type(" ");
+      await new Promise((r) => setTimeout(r, 500));
 
-      await page.waitForSelector('button[aria-label="Model"]');
-      await page.click('button[aria-label="Model"]');
+      // Try multiple selectors for the model button
+      const modelButtonSelectors = [
+        'button[aria-label="Model"]',
+        'button[aria-label="Modelo"]',
+        'button:has(span:text("Model"))',
+        'button:has(span:text("Modelo"))'
+      ];
+      
+      let foundButton = false;
+      for (const sel of modelButtonSelectors) {
+        try {
+          await page.waitForSelector(sel, { timeout: 2000 });
+          await page.click(sel);
+          foundButton = true;
+          break;
+        } catch { continue; }
+      }
+
+      if (!foundButton) {
+        // Fallback: try to find any button that looks like a model selector
+        const clicked = await page.evaluate(() => {
+          const buttons = Array.from(document.querySelectorAll('button'));
+          const modelBtn = buttons.find(b => 
+            b.innerText.toLowerCase().includes('model') || 
+            b.innerText.toLowerCase().includes('modelo') ||
+            b.getAttribute('aria-label')?.toLowerCase().includes('model')
+          );
+          if (modelBtn) {
+            (modelBtn as HTMLElement).click();
+            return true;
+          }
+          return false;
+        });
+        if (!clicked) return [];
+      }
+
       await new Promise((r) => setTimeout(r, 1000));
 
       const models = await page.evaluate(() => {
         const items = Array.from(document.querySelectorAll('[role="menuitem"], [role="option"], button, span'));
-        const names = items.map((el) => (el as HTMLElement).innerText?.trim() || "").filter((t) => t.length > 0 && (t.includes("Claude") || t.includes("GPT") || t.includes("Sonar") || t.includes("DeepSeek") || t.includes("o1") || t.includes("Pro")));
+        const names = items
+          .map((el) => (el as HTMLElement).innerText?.trim() || "")
+          .filter((t) => 
+            t.length > 0 && 
+            (t.includes("Claude") || t.includes("GPT") || t.includes("Sonar") || 
+             t.includes("DeepSeek") || t.includes("o1") || t.includes("Pro") ||
+             t.includes("Gemini") || t.includes("Llama"))
+          );
         return [...new Set(names)];
       });
+
+      // Cleanup: click body to close menu and clear input
       await page.click("body");
+      await page.evaluate((sel) => {
+        const el = document.querySelector(sel) as HTMLTextAreaElement;
+        if (el) el.value = '';
+      }, inputSelector);
+
       return models;
-    } catch { return []; }
+    } catch (error) { 
+      logError("Error listing models:", { error: error instanceof Error ? error.message : String(error) });
+      return []; 
+    }
   }
 
   async performDeepResearch(query: string, attachments?: string[]): Promise<string> {
