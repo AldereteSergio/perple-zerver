@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Page } from "puppeteer";
 import type { PageContentResult, PuppeteerContext } from "../../types/browser.js";
 
 // Mock types for testing - these are partial implementations that satisfy the test requirements
-type MockPage = Pick<Page, never> & { evaluate: ReturnType<typeof vi.fn> };
+type MockPage = { evaluate: ReturnType<typeof vi.fn> };
 type MockPuppeteerContext = Pick<PuppeteerContext, never> & { log: ReturnType<typeof vi.fn> };
 
 // Mock external dependencies
@@ -87,7 +86,7 @@ describe("Extraction Utilities", () => {
         ]),
       };
 
-      const result = await extractSameDomainLinks(mockPage as unknown as Page, "https://example.com");
+      const result = await extractSameDomainLinks(mockPage as any, "https://example.com");
 
       expect(result).toHaveLength(3);
       expect(result[0]?.url).toContain("https://example.com");
@@ -105,7 +104,7 @@ describe("Extraction Utilities", () => {
         ]),
       };
 
-      const result = await extractSameDomainLinks(mockPage as unknown as Page, "https://example.com");
+      const result = await extractSameDomainLinks(mockPage as any, "https://example.com");
 
       // Should only have the valid same-domain link
       expect(result).toHaveLength(1);
@@ -119,7 +118,7 @@ describe("Extraction Utilities", () => {
         evaluate: vi.fn().mockRejectedValue(new Error("Evaluation failed")),
       };
 
-      const result = await extractSameDomainLinks(mockPage as unknown as Page, "https://example.com");
+      const result = await extractSameDomainLinks(mockPage as any, "https://example.com");
 
       expect(result).toEqual([]);
     });
@@ -149,7 +148,7 @@ describe("Extraction Utilities", () => {
         visitedUrls,
         results,
         globalTimeoutSignal,
-        mockCtx as unknown as PuppeteerContext,
+        mockCtx as any,
       );
 
       expect(results).toHaveLength(0);
@@ -170,7 +169,7 @@ describe("Extraction Utilities", () => {
         visitedUrls,
         results,
         globalTimeoutSignal,
-        mockCtx as unknown as PuppeteerContext,
+        mockCtx as any,
       );
 
       // Should have attempted to process the URL
@@ -201,7 +200,7 @@ describe("Extraction Utilities", () => {
         visitedUrls,
         results,
         globalTimeoutSignal,
-        mockCtx as unknown as PuppeteerContext,
+        mockCtx as any,
       );
 
       // Should have attempted to process the URL

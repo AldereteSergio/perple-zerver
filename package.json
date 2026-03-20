@@ -4,19 +4,20 @@
   "description": "Pepe: El servidor MCP de Perplexity de alta densidad con SCQA + Primeros Principios.",
   "main": "src/main.ts",
   "bin": {
-    "pepe": "build/main.js"
+    "pepe": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "start": "node build/main.js",
-    "login": "node build/login.js",
+    "build": "ncc build src/main.ts -o dist --minify --no-cache --external better-sqlite3",
+    "start": "node dist/index.js",
+    "login": "node dist/index.js login",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest --watch",
     "lint": "biome lint . --write",
     "format": "biome format . --write",
-    "dev": "npm run build && npm run start"
+    "dev": "npm run build && npm run start",
+    "prepare": "npm run build"
   },
   "keywords": [
     "mcp",
@@ -34,12 +35,14 @@
     "@types/axios": "0.9.36",
     "@types/jsdom": "21.1.7",
     "@types/mozilla__readability": "0.4.2",
+    "@vercel/ncc": "^0.38.4",
     "axios": "1.10.0",
     "better-sqlite3": "^12.8.0",
+    "chrome-launcher": "^1.2.1",
     "jsdom": "26.1.0",
     "minimist": "1.2.8",
     "prune": "0.0.2",
-    "puppeteer": "24.10.1",
+    "puppeteer-core": "^24.40.0",
     "ts-node": "^10.9.2",
     "zod": "3.25.67"
   },

@@ -3,23 +3,6 @@ import type { PuppeteerContext } from "../../types/browser.js";
 import type { PageContentResult } from "../../types/browser.js";
 import type { ChatMessage } from "../../types/database.js";
 
-// Mock Puppeteer
-vi.mock("puppeteer", () => ({
-  default: {
-    launch: vi.fn(),
-  },
-}));
-
-// Mock Mozilla Readability
-vi.mock("@mozilla/readability", () => ({
-  Readability: vi.fn(),
-}));
-
-// Mock JSDOM
-vi.mock("jsdom", () => ({
-  JSDOM: vi.fn(),
-}));
-
 // Mock logging
 vi.mock("../../utils/logging.js", () => ({
   logInfo: vi.fn(),

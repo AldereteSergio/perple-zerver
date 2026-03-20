@@ -95,7 +95,13 @@ No necesitas clonar el repositorio. Puedes usar a Pepe directamente en tu config
 }
 ```
 
-> **Nota para Windows/WSL**: `npx` descargará y ejecutará Pepe directamente usando `ts-node` sobre el código fuente de TypeScript. No necesitas compilar nada manualmente.
+### Configuración de Cuenta Pro (Login)
+Para acceder a las funciones Pro de Perplexity (modelos avanzados, Deep Research, etc.), debes iniciar sesión una vez:
+
+```bash
+npx -y github:AldereteSergio/Pepe-MCP-Server login
+```
+Esto abrirá una ventana de Chrome/Edge local. Inicia sesión, cierra la ventana y tu sesión quedará guardada de forma persistente en tu carpeta de usuario (`~/.pepe-mcp-session`).
 
 ### Instalación Manual (Desarrollo)
 ```bash

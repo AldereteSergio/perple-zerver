@@ -2,7 +2,10 @@
 node_modules/**
 
 # Build files
-# build/ (Removed to allow npx execution without local compilation)
+# dist/ (Removed to allow npx execution without local compilation)
+build/
+.pepe-mcp-session/
+.perplexity-mcp/
 
 # Environment variables
 .env

@@ -1,6 +1,5 @@
 import { existsSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
 /**
  * DatabaseManager - Handles all database operations
  * Focused, testable module for SQLite database management
@@ -9,6 +8,7 @@ import Database from "better-sqlite3";
 import type { ChatMessage, IDatabaseManager } from "../../types/index.js";
 import { getChatHistory, initializeDatabase, saveChatMessage } from "../../utils/db.js";
 import { logError, logInfo } from "../../utils/logging.js";
+import { CONFIG } from "../config.js";
 
 export class DatabaseManager implements IDatabaseManager {
   private db: any = null;
@@ -19,9 +19,7 @@ export class DatabaseManager implements IDatabaseManager {
   initialize(): void {
     try {
       // Determine database path
-      const dbPath =
-        this.customDbPath ||
-        join(dirname(fileURLToPath(import.meta.url)), "..", "..", "chat_history.db");
+      const dbPath = this.customDbPath || CONFIG.DB_PATH;
 
       const dbDir = dirname(dbPath);
 
